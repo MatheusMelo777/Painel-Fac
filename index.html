@@ -5,7 +5,13 @@
 <title>Yamaguchi — Painel</title>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDMb-J6I9FcKgtxA-Xb88KbIRbJDorhZ1k",authDomain:"painel-yamaguchi.firebaseapp.com",databaseURL:"https://painel-yamaguchi-default-rtdb.firebaseio.com",projectId:"painel-yamaguchi",storageBucket:"painel-yamaguchi.firebasestorage.app",messagingSenderId:"516091632280",appId:"1:516091632280:web:c9ad50d6fe37e1a2bd0eed"};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+</script><style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
 --red:#e01010;--red2:#ff2222;--red-dim:#7a0a0a;
@@ -481,12 +487,13 @@ function toast(msg,tipo=''){
 }
 
 function registrarAtividade(msg){
-  const a=JSON.parse(localStorage.getItem('atividades')||'[]');
   const h=new Date().toLocaleTimeString();
-  a.unshift('['+h+'] '+msg);
-  if(a.length>50)a.pop();
-  localStorage.setItem('atividades',JSON.stringify(a));
-  renderAtividades();
+  db.ref('atividades').transaction(a=>{
+    const arr=a||[];
+    arr.unshift('['+h+'] '+msg);
+    if(arr.length>50)arr.pop();
+    return arr;
+  });
 }
 
 function tempoOnline(ts){
@@ -612,13 +619,26 @@ document.getElementById('loginPass').addEventListener('keydown',e=>{
 
 // ======= INIT =======
 function iniciarPainel(){
-  renderStats();
-  renderMembros();
-  renderAtividades();
-  renderCaixa();
-  renderRanking();
-  renderLocalizacoes();
-  gerarGrafico();
+  // listeners em tempo real
+  db.ref('membros').on('value',snap=>{
+    window._membros=snap.val()||[];
+    renderStats();
+    renderMembros();
+    renderRanking();
+  });
+  db.ref('atividades').on('value',snap=>{
+    window._atividades=snap.val()||[];
+    renderAtividades();
+  });
+  db.ref('caixa').on('value',snap=>{
+    window._caixa=snap.val()||{saldo:0,hist:[]};
+    renderCaixa();
+    gerarGraficoCaixa();
+  });
+  db.ref('localizacoes').on('value',snap=>{
+    window._localizacoes=snap.val()||null;
+    renderLocalizacoes();
+  });
 }
 
 // ======= NAV =======
@@ -633,7 +653,7 @@ function trocarPagina(id,el){
 
 // ======= STATS =======
 function renderStats(){
-  const m=JSON.parse(localStorage.getItem('membros')||'[]');
+  const m=window._membros||[];
   let on=0,off=0,miss=0;
   m.forEach(x=>{
     if(x.status==='online')on++;
@@ -644,15 +664,14 @@ function renderStats(){
   document.getElementById('statOnline').textContent=on;
   document.getElementById('statOffline').textContent=off;
   document.getElementById('statMissao').textContent=miss;
-  const c=parseInt(localStorage.getItem('caixa')||0);
-  const fmt='$'+c.toLocaleString('pt-BR');
-  document.getElementById('statCaixa').textContent=fmt;
+  const c=window._caixa?.saldo||0;
+  document.getElementById('statCaixa').textContent='$'+parseInt(c).toLocaleString('pt-BR');
   gerarGrafico();
 }
 
 // ======= MEMBROS =======
 function renderMembros(silencioso=false){
-  const membros=JSON.parse(localStorage.getItem('membros')||'[]');
+  const membros=window._membros||[];
   const q=(document.getElementById('searchInput')?.value||'').toLowerCase();
   const fs=document.getElementById('filtroStatus')?.value||'';
   const lista=document.getElementById('listaMembros');
@@ -674,7 +693,7 @@ function renderMembros(silencioso=false){
       <td><strong>${m.nome}</strong></td>
       <td><span class="cargo-badge">${m.cargo}</span></td>
       <td><span class="badge ${m.status}"><span class="dot ${m.status}"></span>${sl}</span></td>
-      <td style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);" data-idx="${i}" data-online="${m.status==='online'?m.onlineSince||0:0}">${tempo}</td>
+      <td style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);">${tempo}</td>
       <td style="display:flex;gap:6px;">
         ${canEdit?`<button class="btn btn-sm btn-yellow" onclick="abrirEditar(${i})" style="padding:4px 12px;font-size:11px;">EDITAR</button>`:''}
         ${canEdit?`<button class="btn btn-sm btn-outline" onclick="abrirModal('modalExcluir',${i})" style="padding:4px 12px;font-size:11px;">EXCLUIR</button>`:''}
@@ -688,11 +707,10 @@ function addMembro(){
   if(!nome){toast('// INFORME O NOME');somErro();return;}
   const cargo=document.getElementById('novoCargo').value;
   const status=document.getElementById('novoStatus').value;
-  const m=JSON.parse(localStorage.getItem('membros')||'[]');
+  const m=window._membros?[...window._membros]:[];
   m.push({nome,cargo,status,onlineSince:status==='online'?Date.now():null});
-  localStorage.setItem('membros',JSON.stringify(m));
+  db.ref('membros').set(m);
   document.getElementById('novoNome').value='';
-  renderMembros();renderStats();renderRanking();
   registrarAtividade('Novo membro: '+nome+' ('+cargo+')');
   toast('// '+nome.toUpperCase()+' RECRUTADO','green-toast');
   somSucesso();
@@ -712,12 +730,11 @@ function fecharModal(id){
 }
 
 function confirmarExclusao(){
-  const m=JSON.parse(localStorage.getItem('membros')||'[]');
+  const m=window._membros?[...window._membros]:[];
   const nome=m[idxExcluir]?.nome||'';
   m.splice(idxExcluir,1);
-  localStorage.setItem('membros',JSON.stringify(m));
+  db.ref('membros').set(m);
   fecharModal('modalExcluir');
-  renderMembros();renderStats();renderRanking();
   registrarAtividade('Membro removido: '+nome);
   toast('// MEMBRO EXCLUÍDO');
   somExcluir();
@@ -727,7 +744,7 @@ let idxEditar=null;
 
 function abrirEditar(i){
   idxEditar=i;
-  const m=JSON.parse(localStorage.getItem('membros')||'[]');
+  const m=window._membros||[];
   const mb=m[i];
   document.getElementById('editNome').value=mb.nome;
   document.getElementById('editCargo').value=mb.cargo;
@@ -736,8 +753,8 @@ function abrirEditar(i){
 }
 
 function confirmarEdicao(){
-  const m=JSON.parse(localStorage.getItem('membros')||'[]');
-  const mb=m[idxEditar];
+  const m=window._membros?[...window._membros]:[];
+  const mb={...m[idxEditar]};
   const novoStatus=document.getElementById('editStatus').value;
   mb.nome=document.getElementById('editNome').value.trim()||mb.nome;
   mb.cargo=document.getElementById('editCargo').value;
@@ -745,9 +762,9 @@ function confirmarEdicao(){
     mb.status=novoStatus;
     mb.onlineSince=novoStatus==='online'?Date.now():null;
   }
-  localStorage.setItem('membros',JSON.stringify(m));
+  m[idxEditar]=mb;
+  db.ref('membros').set(m);
   fecharModal('modalEditar');
-  renderMembros();renderStats();renderRanking();
   registrarAtividade('Membro editado: '+mb.nome);
   toast('// ALTERAÇÕES SALVAS','green-toast');
   somSucesso();
@@ -757,12 +774,12 @@ function confirmarEdicao(){
 let chartCaixa;
 
 function renderCaixa(){
-  const c=parseInt(localStorage.getItem('caixa')||0);
-  const fmt='$'+c.toLocaleString('pt-BR');
+  const c=window._caixa?.saldo||0;
+  const fmt='$'+parseInt(c).toLocaleString('pt-BR');
   const el=document.getElementById('caixaValorGrande');
   if(el)el.textContent=fmt;
   document.getElementById('statCaixa').textContent=fmt;
-  const hist=JSON.parse(localStorage.getItem('histCaixa')||'[]');
+  const hist=window._caixa?.hist||[];
   const lista=document.getElementById('histCaixa');
   if(!lista)return;
   if(!hist.length){lista.innerHTML='<li style="justify-content:center;"><div class="empty" style="padding:20px;">// NENHUMA MOVIMENTAÇÃO</div></li>';return;}
@@ -777,30 +794,31 @@ function operacaoCaixa(tipo){
   if(nivelAtual!=='admin'){toast('// SEM PERMISSÃO');somErro();return;}
   const v=prompt(tipo==='add'?'Valor para DEPOSITAR:':'Valor para RETIRAR:');
   if(!v||isNaN(v)||parseInt(v)<=0){toast('// VALOR INVÁLIDO');return;}
-  let c=parseInt(localStorage.getItem('caixa')||0);
   const val=parseInt(v);
-  if(tipo==='rem'&&val>c){toast('// SALDO INSUFICIENTE');somErro();return;}
-  if(tipo==='add')c+=val;else c-=val;
-  localStorage.setItem('caixa',c);
-  const hist=JSON.parse(localStorage.getItem('histCaixa')||'[]');
-  const hora=new Date().toLocaleTimeString();
-  hist.unshift({tipo,val,desc:'['+hora+'] '+(tipo==='add'?'Depósito':'Retirada'),saldo:c});
-  if(hist.length>100)hist.pop();
-  localStorage.setItem('histCaixa',JSON.stringify(hist));
-  renderCaixa();
-  gerarGraficoCaixa();
-  registrarAtividade((tipo==='add'?'Depósito':'Retirada')+' $'+val.toLocaleString('pt-BR'));
-  toast(tipo==='add'?'// DEPÓSITO REALIZADO':'// RETIRADA REALIZADA',tipo==='add'?'green-toast':'');
-  somSucesso();
+  db.ref('caixa').transaction(cx=>{
+    const cur=cx||{saldo:0,hist:[]};
+    if(tipo==='rem'&&val>cur.saldo){return cur;}
+    cur.saldo=(cur.saldo||0)+(tipo==='add'?val:-val);
+    const hist=cur.hist||[];
+    const hora=new Date().toLocaleTimeString();
+    hist.unshift({tipo,val,desc:'['+hora+'] '+(tipo==='add'?'Depósito':'Retirada'),saldo:cur.saldo});
+    if(hist.length>100)hist.pop();
+    cur.hist=hist;
+    return cur;
+  },()=>{
+    registrarAtividade((tipo==='add'?'Depósito':'Retirada')+' $'+val.toLocaleString('pt-BR'));
+    toast(tipo==='add'?'// DEPÓSITO REALIZADO':'// RETIRADA REALIZADA',tipo==='add'?'green-toast':'');
+    somSucesso();
+  });
 }
 
 function gerarGraficoCaixa(){
-  const hist=JSON.parse(localStorage.getItem('histCaixa')||'[]');
+  const hist=window._caixa?.hist||[];
   const ctx=document.getElementById('graficoCaixa');
   if(!ctx)return;
   if(chartCaixa)chartCaixa.destroy();
   const dados=hist.slice(0,10).reverse();
-  if(!dados.length){return;}
+  if(!dados.length)return;
   chartCaixa=new Chart(ctx,{
     type:'line',
     data:{
@@ -829,7 +847,7 @@ function gerarGraficoCaixa(){
 
 // ======= ATIVIDADES =======
 function renderAtividades(){
-  const a=JSON.parse(localStorage.getItem('atividades')||'[]');
+  const a=window._atividades||[];
   const lista=document.getElementById('listaAtividades');
   if(!lista)return;
   if(!a.length){lista.innerHTML='<li class="empty">// NENHUMA ATIVIDADE</li>';return;}
@@ -839,7 +857,7 @@ function renderAtividades(){
 // ======= GRÁFICO STATUS =======
 let chart;
 function gerarGrafico(){
-  const m=JSON.parse(localStorage.getItem('membros')||'[]');
+  const m=window._membros||[];
   let on=0,off=0,miss=0;
   m.forEach(x=>{if(x.status==='online')on++;else if(x.status==='offline')off++;else if(x.status==='missao')miss++;});
   const ctx=document.getElementById('grafico');
