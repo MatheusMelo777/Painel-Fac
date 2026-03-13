@@ -11,11 +11,12 @@
 const firebaseConfig={apiKey:"AIzaSyDMb-J6I9FcKgtxA-Xb88KbIRbJDorhZ1k",authDomain:"painel-yamaguchi.firebaseapp.com",databaseURL:"https://painel-yamaguchi-default-rtdb.firebaseio.com",projectId:"painel-yamaguchi",storageBucket:"painel-yamaguchi.firebasestorage.app",messagingSenderId:"516091632280",appId:"1:516091632280:web:c9ad50d6fe37e1a2bd0eed"};
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
-</script><style>
+</script>
+<style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
 --red:#e01010;--red2:#ff2222;--red-dim:#7a0a0a;
---bg:#060606;--bg2:#0e0e0e;--bg3:#161616;--bg4:#1e1e1e;
+--bg:#060606;--bg2:#0e0e0e;--bg3:#161616;
 --border:#2a0a0a;--border2:#3d1010;
 --text:#f0e0e0;--text2:#a08080;--text3:#604040;
 --green:#00e87a;--yellow:#ffd000;
@@ -29,7 +30,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 /* LOGIN */
 .login-wrap{display:flex;justify-content:center;align-items:center;height:100vh;position:relative;z-index:10;}
-.login-box{background:var(--bg2);border:1px solid var(--border2);border-radius:4px;padding:48px 44px;width:360px;position:relative;box-shadow:var(--glow),inset 0 1px 0 rgba(255,50,50,0.08);}
+.login-box{background:var(--bg2);border:1px solid var(--border2);border-radius:4px;padding:48px 44px;width:360px;position:relative;box-shadow:var(--glow);}
 .login-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--red),transparent);}
 .login-logo{text-align:center;margin-bottom:32px;}
 .login-logo img{width:80px;border-radius:50%;border:2px solid var(--red-dim);box-shadow:0 0 20px rgba(224,16,16,0.4);}
@@ -41,7 +42,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .field input:focus{border-color:var(--red);box-shadow:0 0 0 2px rgba(224,16,16,0.15);}
 .login-status{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);min-height:18px;margin-bottom:10px;letter-spacing:2px;}
 .login-status.typing{color:var(--red2);}
-.btn{width:100%;padding:12px;background:var(--red);border:none;border-radius:3px;color:white;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:3px;cursor:pointer;transition:.2s;margin-top:8px;position:relative;overflow:hidden;}
+.login-err{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--red2);text-align:center;margin-top:12px;display:none;}
+
+.btn{width:100%;padding:12px;background:var(--red);border:none;border-radius:3px;color:white;font-family:'Rajdhani',sans-serif;font-size:15px;font-weight:700;letter-spacing:3px;cursor:pointer;transition:.2s;margin-top:8px;}
 .btn:hover{background:#c00;box-shadow:0 0 20px rgba(224,16,16,0.5);}
 .btn:active{transform:scale(0.98);}
 .btn-sm{width:auto;padding:7px 18px;font-size:13px;letter-spacing:2px;border-radius:3px;margin-top:0;}
@@ -49,15 +52,15 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .btn-outline:hover{border-color:var(--red);color:var(--red);box-shadow:none;}
 .btn-yellow{background:rgba(255,208,0,0.15);border:1px solid rgba(255,208,0,0.3);color:var(--yellow);}
 .btn-yellow:hover{background:rgba(255,208,0,0.25);box-shadow:none;}
-.login-err{font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--red2);text-align:center;margin-top:12px;display:none;}
+.btn-green{background:rgba(0,232,122,0.15);border:1px solid rgba(0,232,122,0.3);color:var(--green);}
+.btn-green:hover{background:rgba(0,232,122,0.25);box-shadow:none;}
 
-/* TELA DE BLOQUEIO */
+/* BLOQUEIO */
 #bloqueio{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.96);z-index:9998;flex-direction:column;align-items:center;justify-content:center;}
 #bloqueio.open{display:flex;}
 #bloqueio h2{font-size:20px;letter-spacing:6px;color:var(--red2);margin-bottom:8px;}
 #bloqueio p{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);letter-spacing:3px;margin-bottom:28px;}
 #bloqueio input{padding:11px 18px;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:16px;outline:none;text-align:center;width:200px;margin-bottom:12px;}
-#bloqueio input:focus{border-color:var(--red);}
 #bloqueioErr{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--red2);display:none;margin-top:8px;}
 
 /* PAINEL */
@@ -65,7 +68,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .sidebar{position:fixed;left:0;top:0;bottom:0;width:230px;background:var(--bg2);border-right:1px solid var(--border2);display:flex;flex-direction:column;z-index:100;}
 .sidebar-top{padding:24px 20px 18px;border-bottom:1px solid var(--border);text-align:center;}
 .sidebar-top img{width:68px;border-radius:50%;border:2px solid var(--red-dim);box-shadow:0 0 16px rgba(224,16,16,0.35);}
-.sidebar-top h2{font-size:17px;font-weight:700;letter-spacing:5px;color:var(--red2);margin-top:10px;text-shadow:0 0 12px rgba(255,34,34,0.4);}
+.sidebar-top h2{font-size:17px;font-weight:700;letter-spacing:5px;color:var(--red2);margin-top:10px;}
 .sidebar-top .mono{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:2px;}
 .sidebar-user{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--green);letter-spacing:2px;margin-top:6px;}
 #relogio{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--text2);margin-top:6px;letter-spacing:2px;}
@@ -86,7 +89,6 @@ nav{flex:1;padding:14px 12px;overflow-y:auto;}
 .page-header h1 span{color:var(--red2);}
 .page-header small{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);letter-spacing:2px;}
 
-/* STAT CARDS */
 .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:14px;margin-bottom:24px;}
 .stat-card{background:var(--bg2);border:1px solid var(--border2);border-radius:4px;padding:18px;position:relative;overflow:hidden;transition:.2s;}
 .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--red),transparent);opacity:.6;}
@@ -96,28 +98,23 @@ nav{flex:1;padding:14px 12px;overflow-y:auto;}
 .stat-value.green{color:var(--green);}
 .stat-value.red{color:var(--red2);}
 .stat-value.yellow{color:var(--yellow);}
-.stat-sub{font-size:12px;color:var(--text3);margin-top:5px;letter-spacing:1px;}
+.stat-sub{font-size:12px;color:var(--text3);margin-top:5px;}
 .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;}
 .dot.online{background:var(--green);box-shadow:0 0 5px var(--green);}
 .dot.offline{background:var(--red2);box-shadow:0 0 5px var(--red2);}
 .dot.missao{background:var(--yellow);box-shadow:0 0 5px var(--yellow);}
 
-/* DASH */
 .dash-grid{display:grid;grid-template-columns:1fr 290px;gap:20px;}
 .panel-box{background:var(--bg2);border:1px solid var(--border2);border-radius:4px;padding:22px;}
 .panel-box h3{font-size:10px;letter-spacing:3px;color:var(--text3);font-family:'Share Tech Mono',monospace;margin-bottom:18px;}
 .grafico-wrap{position:relative;height:230px;}
+.chart-caixa-wrap{position:relative;height:200px;margin-top:16px;}
 
-/* ATIVIDADES */
 .atividade-list{list-style:none;max-height:230px;overflow-y:auto;}
 .atividade-list li{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2);}
 .atividade-list li:last-child{border-bottom:none;}
-.ativ-icon{font-size:11px;color:var(--red);margin-top:1px;font-family:'Share Tech Mono',monospace;flex-shrink:0;}
+.ativ-icon{font-size:11px;color:var(--red);margin-top:1px;flex-shrink:0;}
 
-/* GRÁFICO CAIXA */
-.chart-caixa-wrap{position:relative;height:200px;margin-top:16px;}
-
-/* TABELA */
 .table-wrap{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;}
 thead tr{border-bottom:1px solid var(--border2);}
@@ -130,8 +127,11 @@ td{padding:11px 14px;font-size:14px;color:var(--text);}
 .badge.offline{background:rgba(224,16,16,0.1);color:var(--red2);border:1px solid rgba(224,16,16,0.25);}
 .badge.missao{background:rgba(255,208,0,0.1);color:var(--yellow);border:1px solid rgba(255,208,0,0.25);}
 .cargo-badge{display:inline-block;padding:3px 10px;background:rgba(224,16,16,0.08);border:1px solid var(--border2);border-radius:3px;font-size:11px;color:var(--text2);letter-spacing:1px;}
+.nivel-badge{display:inline-block;padding:3px 10px;border-radius:3px;font-size:11px;letter-spacing:1px;}
+.nivel-badge.admin{background:rgba(224,16,16,0.15);color:var(--red2);border:1px solid rgba(224,16,16,0.3);}
+.nivel-badge.sub{background:rgba(255,208,0,0.1);color:var(--yellow);border:1px solid rgba(255,208,0,0.25);}
+.nivel-badge.view{background:rgba(160,128,128,0.1);color:var(--text2);border:1px solid var(--border2);}
 
-/* FORM */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:540px;}
 .field-group{display:flex;flex-direction:column;gap:6px;}
 .field-group label{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--text3);}
@@ -139,14 +139,12 @@ td{padding:11px 14px;font-size:14px;color:var(--text);}
 .field-group input:focus,.field-group select:focus{border-color:var(--red);box-shadow:0 0 0 2px rgba(224,16,16,0.12);}
 .field-group select option{background:var(--bg3);}
 
-/* RANKING */
 .rank-bar-wrap{margin-bottom:12px;}
 .rank-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;}
 .rank-label span:last-child{font-family:'Share Tech Mono',monospace;color:var(--text3);}
 .rank-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
 .rank-fill{height:100%;background:var(--red);border-radius:3px;transition:width .6s ease;}
 
-/* LOC */
 .loc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;}
 .loc-card{background:var(--bg2);border:1px solid var(--border2);border-radius:4px;overflow:hidden;transition:.2s;}
 .loc-card:hover{border-color:var(--red);box-shadow:var(--glow);}
@@ -162,40 +160,33 @@ td{padding:11px 14px;font-size:14px;color:var(--text);}
 .loc-card-body input:focus{border-color:var(--red);}
 .loc-card-body input::placeholder{color:var(--text3);}
 
-/* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;z-index:999;}
 .modal-overlay.open{display:flex;}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:4px;padding:30px;width:360px;box-shadow:0 0 40px rgba(224,16,16,0.2);}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:4px;padding:30px;width:380px;box-shadow:0 0 40px rgba(224,16,16,0.2);}
 .modal h3{font-size:16px;font-weight:700;letter-spacing:3px;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border);}
 .modal p{font-size:14px;color:var(--text2);margin-bottom:22px;line-height:1.6;}
 .modal-btns{display:flex;gap:10px;}
 .modal-btns .btn{flex:1;}
-.modal .form-grid{max-width:100%;}
 
-/* LIGHTBOX */
 .lightbox{position:fixed;inset:0;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;z-index:9999;cursor:zoom-out;}
 .lightbox.open{display:flex;}
 .lightbox img{max-width:90vw;max-height:88vh;object-fit:contain;border:1px solid var(--border2);border-radius:4px;}
 .lightbox-close{position:fixed;top:22px;right:26px;font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--text2);letter-spacing:3px;cursor:pointer;}
 .lightbox-close:hover{color:var(--red2);}
 
-/* HIST CAIXA */
 .hist-list{list-style:none;max-height:200px;overflow-y:auto;}
 .hist-list li{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
 .hist-list li:last-child{border-bottom:none;}
 .hist-plus{color:var(--green);font-weight:700;font-family:'Share Tech Mono',monospace;}
 .hist-minus{color:var(--red2);font-weight:700;font-family:'Share Tech Mono',monospace;}
 
-/* SEARCH */
-.search-bar{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
-.search-bar input{flex:1;max-width:280px;padding:8px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:14px;outline:none;transition:.2s;}
+.search-bar{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+.search-bar input{flex:1;min-width:180px;max-width:280px;padding:8px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:14px;outline:none;transition:.2s;}
 .search-bar input:focus{border-color:var(--red);}
 
-/* TOAST */
 .toast{position:fixed;bottom:26px;right:26px;background:var(--bg2);border:1px solid var(--border2);border-left:3px solid var(--red);padding:12px 20px;border-radius:4px;font-size:13px;color:var(--text);letter-spacing:1px;z-index:9999;transform:translateX(140%);transition:.3s cubic-bezier(.4,0,.2,1);box-shadow:0 4px 20px rgba(0,0,0,0.6);font-family:'Share Tech Mono',monospace;}
 .toast.show{transform:translateX(0);}
 .toast.green-toast{border-left-color:var(--green);}
-.toast.yellow-toast{border-left-color:var(--yellow);}
 
 .empty{text-align:center;padding:36px 20px;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--text3);}
 .flex-gap{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;}
@@ -212,24 +203,18 @@ td{padding:11px 14px;font-size:14px;color:var(--text);}
       <h1>YAMAGUCHI</h1>
       <p>SISTEMA INTERNO // ACESSO RESTRITO</p>
     </div>
-    <div class="field">
-      <label>USUÁRIO</label>
-      <input id="loginUser" placeholder="Digite seu usuário" autocomplete="off">
-    </div>
-    <div class="field">
-      <label>SENHA</label>
-      <input id="loginPass" type="password" placeholder="••••••••">
-    </div>
+    <div class="field"><label>USUÁRIO</label><input id="loginUser" placeholder="Digite seu usuário" autocomplete="off"></div>
+    <div class="field"><label>SENHA</label><input id="loginPass" type="password" placeholder="••••••••"></div>
     <div class="login-status" id="loginStatus">&nbsp;</div>
     <button class="btn" id="btnLogin" onclick="fazerLogin()">ACESSAR SISTEMA</button>
     <div class="login-err" id="loginErr">// CREDENCIAIS INVÁLIDAS</div>
   </div>
 </div>
 
-<!-- TELA DE BLOQUEIO -->
+<!-- BLOQUEIO -->
 <div id="bloqueio">
   <h2>⚿ SESSÃO BLOQUEADA</h2>
-  <p>// INATIVIDADE DETECTADA — INSIRA A SENHA</p>
+  <p>// INATIVIDADE DETECTADA</p>
   <input type="password" id="bloqueioSenha" placeholder="Senha" onkeydown="if(event.key==='Enter')desbloquear()">
   <button class="btn" style="width:200px;" onclick="desbloquear()">DESBLOQUEAR</button>
   <div id="bloqueioErr">// SENHA INCORRETA</div>
@@ -245,13 +230,14 @@ td{padding:11px 14px;font-size:14px;color:var(--text);}
       <div class="sidebar-user" id="sidebarUser">// USER: —</div>
       <div id="relogio">--:--:--</div>
     </div>
-    <nav>
+    <nav id="navMenu">
       <div class="nav-item active" onclick="trocarPagina('dashboard',this)"><span class="icon">⬡</span> DASHBOARD</div>
       <div class="nav-item" onclick="trocarPagina('membros',this)"><span class="icon">◈</span> MEMBROS</div>
-      <div class="nav-item" onclick="trocarPagina('recrutar',this)"><span class="icon">✦</span> RECRUTAR</div>
-      <div class="nav-item" onclick="trocarPagina('caixa',this)"><span class="icon">◆</span> CAIXA</div>
+      <div class="nav-item nav-admin" onclick="trocarPagina('recrutar',this)"><span class="icon">✦</span> RECRUTAR</div>
+      <div class="nav-item nav-admin" onclick="trocarPagina('caixa',this)"><span class="icon">◆</span> CAIXA</div>
       <div class="nav-item" onclick="trocarPagina('ranking',this)"><span class="icon">▲</span> RANKING</div>
       <div class="nav-item" onclick="trocarPagina('localizacoes',this)"><span class="icon">◎</span> LOCALIZAÇÕES</div>
+      <div class="nav-item nav-admin" onclick="trocarPagina('usuarios',this)"><span class="icon">👤</span> USUÁRIOS</div>
     </nav>
     <div class="sidebar-bottom">
       <div class="nav-item" onclick="bloquearTela()" style="margin-bottom:6px;"><span class="icon">⚿</span> BLOQUEAR</div>
@@ -263,46 +249,17 @@ td{padding:11px 14px;font-size:14px;color:var(--text);}
 
     <!-- DASHBOARD -->
     <div id="dashboard" class="page active">
-      <div class="page-header">
-        <h1>DASH<span>BOARD</span></h1>
-        <small>VISÃO GERAL</small>
-      </div>
+      <div class="page-header"><h1>DASH<span>BOARD</span></h1><small>VISÃO GERAL</small></div>
       <div class="stat-grid">
-        <div class="stat-card">
-          <div class="stat-label">TOTAL MEMBROS</div>
-          <div class="stat-value" id="totalMembros">0</div>
-          <div class="stat-sub">na facção</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">ONLINE AGORA</div>
-          <div class="stat-value green" id="statOnline">0</div>
-          <div class="stat-sub"><span class="dot online"></span>ativos</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">EM MISSÃO</div>
-          <div class="stat-value yellow" id="statMissao">0</div>
-          <div class="stat-sub"><span class="dot missao"></span>em campo</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">OFFLINE</div>
-          <div class="stat-value red" id="statOffline">0</div>
-          <div class="stat-sub"><span class="dot offline"></span>inativos</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">CAIXA</div>
-          <div class="stat-value green" id="statCaixa">$0</div>
-          <div class="stat-sub">saldo atual</div>
-        </div>
+        <div class="stat-card"><div class="stat-label">TOTAL MEMBROS</div><div class="stat-value" id="totalMembros">0</div><div class="stat-sub">na facção</div></div>
+        <div class="stat-card"><div class="stat-label">ONLINE AGORA</div><div class="stat-value green" id="statOnline">0</div><div class="stat-sub"><span class="dot online"></span>ativos</div></div>
+        <div class="stat-card"><div class="stat-label">EM MISSÃO</div><div class="stat-value yellow" id="statMissao">0</div><div class="stat-sub"><span class="dot missao"></span>em campo</div></div>
+        <div class="stat-card"><div class="stat-label">OFFLINE</div><div class="stat-value red" id="statOffline">0</div><div class="stat-sub"><span class="dot offline"></span>inativos</div></div>
+        <div class="stat-card"><div class="stat-label">CAIXA</div><div class="stat-value green" id="statCaixa">$0</div><div class="stat-sub">saldo atual</div></div>
       </div>
       <div class="dash-grid">
-        <div class="panel-box">
-          <h3>// ATIVIDADES RECENTES</h3>
-          <ul class="atividade-list" id="listaAtividades"></ul>
-        </div>
-        <div class="panel-box">
-          <h3>// STATUS DOS MEMBROS</h3>
-          <div class="grafico-wrap"><canvas id="grafico"></canvas></div>
-        </div>
+        <div class="panel-box"><h3>// ATIVIDADES RECENTES</h3><ul class="atividade-list" id="listaAtividades"></ul></div>
+        <div class="panel-box"><h3>// STATUS DOS MEMBROS</h3><div class="grafico-wrap"><canvas id="grafico"></canvas></div></div>
       </div>
     </div>
 
@@ -311,17 +268,14 @@ td{padding:11px 14px;font-size:14px;color:var(--text);}
       <div class="page-header"><h1>MEM<span>BROS</span></h1></div>
       <div class="search-bar">
         <input id="searchInput" placeholder="Buscar nome..." oninput="renderMembros()">
-        <select id="filtroStatus" onchange="renderMembros()" style="padding:8px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;color:var(--text2);font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;outline:none;">
-          <option value="">TODOS</option>
-          <option value="online">ONLINE</option>
-          <option value="offline">OFFLINE</option>
-          <option value="missao">MISSÃO</option>
+        <select id="filtroStatus" onchange="renderMembros()" style="padding:8px 12px;background:var(--bg3);border:1px solid var(--border2);border-radius:3px;color:var(--text2);font-family:'Share Tech Mono',monospace;font-size:11px;outline:none;">
+          <option value="">TODOS</option><option value="online">ONLINE</option><option value="offline">OFFLINE</option><option value="missao">MISSÃO</option>
         </select>
       </div>
       <div class="panel-box">
         <div class="table-wrap">
           <table>
-            <thead><tr><th>NOME</th><th>CARGO</th><th>STATUS</th><th>TEMPO ONLINE</th><th>AÇÕES</th></tr></thead>
+            <thead><tr><th>NOME</th><th>CARGO</th><th>STATUS</th><th>AÇÕES</th></tr></thead>
             <tbody id="listaMembros"></tbody>
           </table>
         </div>
@@ -334,24 +288,12 @@ td{padding:11px 14px;font-size:14px;color:var(--text);}
       <div class="panel-box" style="max-width:540px;">
         <h3>// NOVO MEMBRO</h3>
         <div class="form-grid">
-          <div class="field-group" style="grid-column:1/-1">
-            <label>NOME DO MEMBRO</label>
-            <input id="novoNome" placeholder="Nome completo">
+          <div class="field-group" style="grid-column:1/-1"><label>NOME DO MEMBRO</label><input id="novoNome" placeholder="Nome completo"></div>
+          <div class="field-group"><label>CARGO</label>
+            <select id="novoCargo"><option>Líder</option><option>Sub-Líder</option><option>Capitão</option><option>Soldado</option><option>Recruta</option></select>
           </div>
-          <div class="field-group">
-            <label>CARGO</label>
-            <select id="novoCargo">
-              <option>Líder</option><option>Sub-Líder</option>
-              <option>Capitão</option><option>Soldado</option><option>Recruta</option>
-            </select>
-          </div>
-          <div class="field-group">
-            <label>STATUS INICIAL</label>
-            <select id="novoStatus">
-              <option value="online">Online</option>
-              <option value="offline">Offline</option>
-              <option value="missao">Missão</option>
-            </select>
+          <div class="field-group"><label>STATUS INICIAL</label>
+            <select id="novoStatus"><option value="online">Online</option><option value="offline">Offline</option><option value="missao">Missão</option></select>
           </div>
         </div>
         <button class="btn btn-sm" onclick="addMembro()" style="margin-top:18px;">ADICIONAR MEMBRO</button>
@@ -362,24 +304,15 @@ td{padding:11px 14px;font-size:14px;color:var(--text);}
     <div id="caixa" class="page">
       <div class="page-header"><h1>CAI<span>XA</span></h1></div>
       <div class="stat-grid" style="max-width:300px;margin-bottom:18px;">
-        <div class="stat-card">
-          <div class="stat-label">SALDO ATUAL</div>
-          <div class="stat-value green" id="caixaValorGrande">$0</div>
-        </div>
+        <div class="stat-card"><div class="stat-label">SALDO ATUAL</div><div class="stat-value green" id="caixaValorGrande">$0</div></div>
       </div>
       <div class="flex-gap">
         <button class="btn btn-sm" onclick="operacaoCaixa('add')">+ DEPOSITAR</button>
         <button class="btn btn-sm btn-outline" onclick="operacaoCaixa('rem')">− RETIRAR</button>
       </div>
       <div class="two-col">
-        <div class="panel-box">
-          <h3>// HISTÓRICO</h3>
-          <ul class="hist-list" id="histCaixa"></ul>
-        </div>
-        <div class="panel-box">
-          <h3>// EVOLUÇÃO DO SALDO</h3>
-          <div class="chart-caixa-wrap"><canvas id="graficoCaixa"></canvas></div>
-        </div>
+        <div class="panel-box"><h3>// HISTÓRICO</h3><ul class="hist-list" id="histCaixa"></ul></div>
+        <div class="panel-box"><h3>// EVOLUÇÃO DO SALDO</h3><div class="chart-caixa-wrap"><canvas id="graficoCaixa"></canvas></div></div>
       </div>
     </div>
 
@@ -387,14 +320,8 @@ td{padding:11px 14px;font-size:14px;color:var(--text);}
     <div id="ranking" class="page">
       <div class="page-header"><h1>RAN<span>KING</span></h1></div>
       <div class="two-col">
-        <div class="panel-box">
-          <h3>// MEMBROS POR CARGO</h3>
-          <div id="rankCargos"></div>
-        </div>
-        <div class="panel-box">
-          <h3>// DISTRIBUIÇÃO DE CARGOS</h3>
-          <div style="position:relative;height:220px;"><canvas id="graficoCargos"></canvas></div>
-        </div>
+        <div class="panel-box"><h3>// MEMBROS POR CARGO</h3><div id="rankCargos"></div></div>
+        <div class="panel-box"><h3>// DISTRIBUIÇÃO DE CARGOS</h3><div style="position:relative;height:220px;"><canvas id="graficoCargos"></canvas></div></div>
       </div>
     </div>
 
@@ -404,10 +331,40 @@ td{padding:11px 14px;font-size:14px;color:var(--text);}
       <div class="loc-grid" id="locGrid"></div>
     </div>
 
+    <!-- USUÁRIOS -->
+    <div id="usuarios" class="page">
+      <div class="page-header"><h1>USUÁ<span>RIOS</span></h1><small>APENAS ADMIN</small></div>
+      <div class="panel-box" style="max-width:560px;margin-bottom:24px;">
+        <h3>// CRIAR USUÁRIO</h3>
+        <div class="form-grid">
+          <div class="field-group"><label>LOGIN</label><input id="novoUserLogin" placeholder="ex: joao123"></div>
+          <div class="field-group"><label>SENHA</label><input id="novoUserSenha" placeholder="Mínimo 4 caracteres" type="password"></div>
+          <div class="field-group"><label>NOME EXIBIDO</label><input id="novoUserNome" placeholder="ex: João Silva"></div>
+          <div class="field-group"><label>NÍVEL DE ACESSO</label>
+            <select id="novoUserNivel">
+              <option value="view">Soldado (só visualiza)</option>
+              <option value="sub">Sub-Líder (edita membros)</option>
+              <option value="admin">Admin (acesso total)</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-green" onclick="criarUsuario()" style="margin-top:18px;">CRIAR USUÁRIO</button>
+      </div>
+      <div class="panel-box">
+        <h3>// USUÁRIOS CADASTRADOS</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>LOGIN</th><th>NOME</th><th>NÍVEL</th><th>CRIADO POR</th><th>AÇÃO</th></tr></thead>
+            <tbody id="listaUsuarios"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- MODAL EXCLUIR -->
+<!-- MODAL EXCLUIR MEMBRO -->
 <div class="modal-overlay" id="modalExcluir">
   <div class="modal">
     <h3>CONFIRMAR EXCLUSÃO</h3>
@@ -419,34 +376,34 @@ td{padding:11px 14px;font-size:14px;color:var(--text);}
   </div>
 </div>
 
-<!-- MODAL EDITAR -->
+<!-- MODAL EDITAR MEMBRO -->
 <div class="modal-overlay" id="modalEditar">
   <div class="modal">
     <h3>EDITAR MEMBRO</h3>
     <div class="form-grid" style="max-width:100%;margin-bottom:20px;">
-      <div class="field-group" style="grid-column:1/-1">
-        <label>NOME</label>
-        <input id="editNome" placeholder="Nome">
+      <div class="field-group" style="grid-column:1/-1"><label>NOME</label><input id="editNome"></div>
+      <div class="field-group"><label>CARGO</label>
+        <select id="editCargo"><option>Líder</option><option>Sub-Líder</option><option>Capitão</option><option>Soldado</option><option>Recruta</option></select>
       </div>
-      <div class="field-group">
-        <label>CARGO</label>
-        <select id="editCargo">
-          <option>Líder</option><option>Sub-Líder</option>
-          <option>Capitão</option><option>Soldado</option><option>Recruta</option>
-        </select>
-      </div>
-      <div class="field-group">
-        <label>STATUS</label>
-        <select id="editStatus">
-          <option value="online">Online</option>
-          <option value="offline">Offline</option>
-          <option value="missao">Missão</option>
-        </select>
+      <div class="field-group"><label>STATUS</label>
+        <select id="editStatus"><option value="online">Online</option><option value="offline">Offline</option><option value="missao">Missão</option></select>
       </div>
     </div>
     <div class="modal-btns">
       <button class="btn btn-sm btn-outline" onclick="fecharModal('modalEditar')">CANCELAR</button>
       <button class="btn btn-sm" onclick="confirmarEdicao()">SALVAR</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EXCLUIR USUÁRIO -->
+<div class="modal-overlay" id="modalExcluirUser">
+  <div class="modal">
+    <h3>EXCLUIR USUÁRIO</h3>
+    <p>Tem certeza? Este usuário não conseguirá mais acessar o sistema.</p>
+    <div class="modal-btns">
+      <button class="btn btn-sm btn-outline" onclick="fecharModal('modalExcluirUser')">CANCELAR</button>
+      <button class="btn btn-sm" onclick="confirmarExclusaoUser()">EXCLUIR</button>
     </div>
   </div>
 </div>
@@ -461,18 +418,8 @@ td{padding:11px 14px;font-size:14px;color:var(--text);}
 
 <script>
 // ======= ÁUDIO =======
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-function beep(freq=440, dur=0.12, type='square', vol=0.08){
-  try{
-    const a=new AudioCtx();
-    const o=a.createOscillator();
-    const g=a.createGain();
-    o.connect(g);g.connect(a.destination);
-    o.type=type;o.frequency.value=freq;
-    g.gain.setValueAtTime(vol,a.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+dur);
-    o.start();o.stop(a.currentTime+dur);
-  }catch(e){}
+function beep(freq=440,dur=0.12,type='square',vol=0.08){
+  try{const a=new(window.AudioContext||window.webkitAudioContext)();const o=a.createOscillator();const g=a.createGain();o.connect(g);g.connect(a.destination);o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(vol,a.currentTime);g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+dur);o.start();o.stop(a.currentTime+dur);}catch(e){}
 }
 function somSucesso(){beep(660,0.08);setTimeout(()=>beep(880,0.1),90);}
 function somErro(){beep(220,0.2,'sawtooth',0.06);}
@@ -481,47 +428,18 @@ function somExcluir(){beep(330,0.15,'square',0.07);}
 // ======= UTILS =======
 function toast(msg,tipo=''){
   const t=document.getElementById('toast');
-  t.textContent=msg;
-  t.className='toast show'+(tipo?' '+tipo:'');
+  t.textContent=msg;t.className='toast show'+(tipo?' '+tipo:'');
   setTimeout(()=>{t.className='toast';},2800);
 }
 
-function registrarAtividade(msg){
-  const h=new Date().toLocaleTimeString();
-  db.ref('atividades').transaction(a=>{
-    const arr=a||[];
-    arr.unshift('['+h+'] '+msg);
-    if(arr.length>50)arr.pop();
-    return arr;
-  });
-}
-
-function tempoOnline(ts){
-  if(!ts)return '—';
-  const d=Math.floor((Date.now()-ts)/1000);
-  if(d<60)return d+'s';
-  if(d<3600)return Math.floor(d/60)+'min';
-  return Math.floor(d/3600)+'h '+Math.floor((d%3600)/60)+'min';
-}
-
 // ======= RELÓGIO =======
-setInterval(()=>{
-  document.getElementById('relogio').textContent=new Date().toLocaleTimeString();
-  const el=document.getElementById('listaMembros');
-  if(el)renderMembros(true);
-},1000);
+setInterval(()=>{document.getElementById('relogio').textContent=new Date().toLocaleTimeString();},1000);
 
-// ======= BLOQUEIO AUTOMÁTICO =======
+// ======= BLOQUEIO =======
 let timerBloqueio;
 let senhaAtual='';
-
-function resetarTimer(){
-  clearTimeout(timerBloqueio);
-  timerBloqueio=setTimeout(bloquearTela, 5*60*1000); // 5 min
-}
-
+function resetarTimer(){clearTimeout(timerBloqueio);timerBloqueio=setTimeout(bloquearTela,5*60*1000);}
 ['click','keydown','mousemove'].forEach(e=>document.addEventListener(e,resetarTimer));
-
 function bloquearTela(){
   if(document.getElementById('painel').style.display==='none')return;
   document.getElementById('bloqueio').classList.add('open');
@@ -529,59 +447,43 @@ function bloquearTela(){
   document.getElementById('bloqueioErr').style.display='none';
   setTimeout(()=>document.getElementById('bloqueioSenha').focus(),100);
 }
-
 function desbloquear(){
-  const s=document.getElementById('bloqueioSenha').value;
-  if(s===senhaAtual){
+  if(document.getElementById('bloqueioSenha').value===senhaAtual){
     document.getElementById('bloqueio').classList.remove('open');
-    document.getElementById('bloqueioErr').style.display='none';
-    resetarTimer();
-    somSucesso();
-  }else{
-    document.getElementById('bloqueioErr').style.display='block';
-    somErro();
-  }
+    resetarTimer();somSucesso();
+  }else{document.getElementById('bloqueioErr').style.display='block';somErro();}
 }
 
-// ======= USUÁRIOS =======
-const USUARIOS={
-  admin:{senha:'123',nivel:'admin',label:'ADMIN'},
-  sub:{senha:'456',nivel:'sub',label:'SUB-LÍDER'},
-  soldado:{senha:'789',nivel:'view',label:'SOLDADO'}
-};
+// ======= LOGIN =======
 let nivelAtual='';
 let usuarioAtual='';
+const TYPING_MSGS=['VERIFICANDO CREDENCIAIS...','CONSULTANDO BANCO DE DADOS...','AUTENTICANDO USUÁRIO...','LIBERANDO ACESSO...'];
 
-// ======= LOGIN =======
-const TYPING_MSGS=[
-  'VERIFICANDO CREDENCIAIS...',
-  'CONSULTANDO BANCO DE DADOS...',
-  'AUTENTICANDO USUÁRIO...',
-  'ESTABELECENDO CONEXÃO SEGURA...',
-  'LIBERANDO ACESSO...'
-];
+// Admin padrão fixo (caso o banco esteja vazio)
+const ADMIN_PADRAO={login:'admin',senha:'123',nome:'Admin',nivel:'admin'};
 
 function fazerLogin(){
-  const u=document.getElementById('loginUser').value.trim();
+  const u=document.getElementById('loginUser').value.trim().toLowerCase();
   const p=document.getElementById('loginPass').value;
   const btn=document.getElementById('btnLogin');
   const statusEl=document.getElementById('loginStatus');
-
-  btn.disabled=true;
-  btn.textContent='VERIFICANDO...';
+  if(!u||!p){toast('// PREENCHA TODOS OS CAMPOS');return;}
+  btn.disabled=true;btn.textContent='VERIFICANDO...';
   statusEl.className='login-status typing';
-
   let idx=0;
-  const interval=setInterval(()=>{
-    statusEl.textContent=TYPING_MSGS[idx%TYPING_MSGS.length];
-    idx++;
-    beep(600+idx*40,0.04,'sine',0.04);
-  },300);
+  const iv=setInterval(()=>{statusEl.textContent=TYPING_MSGS[idx%TYPING_MSGS.length];idx++;beep(600+idx*40,0.04,'sine',0.04);},350);
 
-  setTimeout(()=>{
-    clearInterval(interval);
-    const user=USUARIOS[u];
-    if(user&&user.senha===p){
+  // Buscar usuário no Firebase
+  db.ref('usuarios/'+u).once('value',snap=>{
+    clearInterval(iv);
+    let user=snap.val();
+
+    // Fallback para admin padrão
+    if(!user && u===ADMIN_PADRAO.login && p===ADMIN_PADRAO.senha){
+      user=ADMIN_PADRAO;
+    }
+
+    if(user && user.senha===p){
       statusEl.textContent='// ACESSO CONCEDIDO';
       beep(880,0.05);setTimeout(()=>beep(1100,0.1),60);
       senhaAtual=p;
@@ -590,7 +492,7 @@ function fazerLogin(){
       setTimeout(()=>{
         document.getElementById('loginPage').style.display='none';
         document.getElementById('painel').style.display='block';
-        document.getElementById('sidebarUser').textContent='// '+user.label;
+        document.getElementById('sidebarUser').textContent='// '+user.nome.toUpperCase();
         aplicarPermissoes();
         iniciarPainel();
         resetarTimer();
@@ -598,47 +500,46 @@ function fazerLogin(){
     }else{
       statusEl.textContent='';
       document.getElementById('loginErr').style.display='block';
-      btn.disabled=false;
-      btn.textContent='ACESSAR SISTEMA';
-      somErro();
+      btn.disabled=false;btn.textContent='ACESSAR SISTEMA';somErro();
     }
-  },TYPING_MSGS.length*300+200);
+  });
 }
 
 function aplicarPermissoes(){
-  // nível view não pode editar/excluir
-  if(nivelAtual==='view'){
-    document.querySelector('[onclick="trocarPagina(\'recrutar\',this)"]').style.display='none';
-    document.querySelector('[onclick="trocarPagina(\'caixa\',this)"]').style.display='none';
-  }
+  // Esconder itens de admin para quem não é admin
+  document.querySelectorAll('.nav-admin').forEach(el=>{
+    el.style.display=(nivelAtual==='admin')?'flex':'none';
+  });
 }
 
-document.getElementById('loginPass').addEventListener('keydown',e=>{
-  if(e.key==='Enter')fazerLogin();
-});
+document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='Enter')fazerLogin();});
 
 // ======= INIT =======
 function iniciarPainel(){
-  // listeners em tempo real
   db.ref('membros').on('value',snap=>{
     window._membros=snap.val()||[];
-    renderStats();
-    renderMembros();
-    renderRanking();
+    if(!Array.isArray(window._membros))window._membros=Object.values(window._membros);
+    renderStats();renderMembros();renderRanking();
   });
   db.ref('atividades').on('value',snap=>{
     window._atividades=snap.val()||[];
+    if(!Array.isArray(window._atividades))window._atividades=Object.values(window._atividades).reverse();
     renderAtividades();
   });
   db.ref('caixa').on('value',snap=>{
     window._caixa=snap.val()||{saldo:0,hist:[]};
-    renderCaixa();
-    gerarGraficoCaixa();
+    renderCaixa();gerarGraficoCaixa();
   });
   db.ref('localizacoes').on('value',snap=>{
     window._localizacoes=snap.val()||null;
     renderLocalizacoes();
   });
+  if(nivelAtual==='admin'){
+    db.ref('usuarios').on('value',snap=>{
+      window._usuarios=snap.val()||{};
+      renderUsuarios();
+    });
+  }
 }
 
 // ======= NAV =======
@@ -652,51 +553,40 @@ function trocarPagina(id,el){
 }
 
 // ======= STATS =======
+let chart;
 function renderStats(){
   const m=window._membros||[];
   let on=0,off=0,miss=0;
-  m.forEach(x=>{
-    if(x.status==='online')on++;
-    else if(x.status==='offline')off++;
-    else if(x.status==='missao')miss++;
-  });
+  m.forEach(x=>{if(x.status==='online')on++;else if(x.status==='offline')off++;else if(x.status==='missao')miss++;});
   document.getElementById('totalMembros').textContent=m.length;
   document.getElementById('statOnline').textContent=on;
   document.getElementById('statOffline').textContent=off;
   document.getElementById('statMissao').textContent=miss;
   const c=window._caixa?.saldo||0;
   document.getElementById('statCaixa').textContent='$'+parseInt(c).toLocaleString('pt-BR');
-  gerarGrafico();
+  gerarGrafico(on,off,miss);
 }
 
 // ======= MEMBROS =======
-function renderMembros(silencioso=false){
+function renderMembros(){
   const membros=window._membros||[];
   const q=(document.getElementById('searchInput')?.value||'').toLowerCase();
   const fs=document.getElementById('filtroStatus')?.value||'';
   const lista=document.getElementById('listaMembros');
   if(!lista)return;
-  const f=membros.filter(m=>
-    m.nome.toLowerCase().includes(q)&&
-    (!fs||m.status===fs)
-  );
-  if(!f.length){
-    lista.innerHTML='<tr><td colspan="5"><div class="empty">// NENHUM MEMBRO ENCONTRADO</div></td></tr>';
-    return;
-  }
+  const f=membros.filter(m=>m.nome.toLowerCase().includes(q)&&(!fs||m.status===fs));
+  if(!f.length){lista.innerHTML='<tr><td colspan="4"><div class="empty">// NENHUM MEMBRO ENCONTRADO</div></td></tr>';return;}
   const canEdit=(nivelAtual==='admin'||nivelAtual==='sub');
   lista.innerHTML=f.map(m=>{
     const i=membros.indexOf(m);
     const sl={online:'ONLINE',offline:'OFFLINE',missao:'MISSÃO'}[m.status]||m.status.toUpperCase();
-    const tempo=m.status==='online'?tempoOnline(m.onlineSince):'—';
     return`<tr>
       <td><strong>${m.nome}</strong></td>
       <td><span class="cargo-badge">${m.cargo}</span></td>
       <td><span class="badge ${m.status}"><span class="dot ${m.status}"></span>${sl}</span></td>
-      <td style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);">${tempo}</td>
       <td style="display:flex;gap:6px;">
         ${canEdit?`<button class="btn btn-sm btn-yellow" onclick="abrirEditar(${i})" style="padding:4px 12px;font-size:11px;">EDITAR</button>`:''}
-        ${canEdit?`<button class="btn btn-sm btn-outline" onclick="abrirModal('modalExcluir',${i})" style="padding:4px 12px;font-size:11px;">EXCLUIR</button>`:''}
+        ${canEdit?`<button class="btn btn-sm btn-outline" onclick="prepExcluir(${i})" style="padding:4px 12px;font-size:11px;">EXCLUIR</button>`:''}
       </td>
     </tr>`;
   }).join('');
@@ -712,23 +602,11 @@ function addMembro(){
   db.ref('membros').set(m);
   document.getElementById('novoNome').value='';
   registrarAtividade('Novo membro: '+nome+' ('+cargo+')');
-  toast('// '+nome.toUpperCase()+' RECRUTADO','green-toast');
-  somSucesso();
+  toast('// '+nome.toUpperCase()+' RECRUTADO','green-toast');somSucesso();
 }
 
 let idxExcluir=null;
-
-function abrirModal(id,idx){
-  if(idx!==undefined)idxExcluir=idx;
-  document.getElementById(id).classList.add('open');
-}
-
-function fecharModal(id){
-  document.getElementById(id).classList.remove('open');
-  if(id==='modalExcluir')idxExcluir=null;
-  if(id==='modalEditar')idxEditar=null;
-}
-
+function prepExcluir(i){idxExcluir=i;document.getElementById('modalExcluir').classList.add('open');}
 function confirmarExclusao(){
   const m=window._membros?[...window._membros]:[];
   const nome=m[idxExcluir]?.nome||'';
@@ -736,43 +614,94 @@ function confirmarExclusao(){
   db.ref('membros').set(m);
   fecharModal('modalExcluir');
   registrarAtividade('Membro removido: '+nome);
-  toast('// MEMBRO EXCLUÍDO');
-  somExcluir();
+  toast('// MEMBRO EXCLUÍDO');somExcluir();
 }
 
 let idxEditar=null;
-
 function abrirEditar(i){
   idxEditar=i;
-  const m=window._membros||[];
-  const mb=m[i];
-  document.getElementById('editNome').value=mb.nome;
-  document.getElementById('editCargo').value=mb.cargo;
-  document.getElementById('editStatus').value=mb.status;
-  abrirModal('modalEditar');
+  const m=window._membros[i];
+  document.getElementById('editNome').value=m.nome;
+  document.getElementById('editCargo').value=m.cargo;
+  document.getElementById('editStatus').value=m.status;
+  document.getElementById('modalEditar').classList.add('open');
 }
-
 function confirmarEdicao(){
   const m=window._membros?[...window._membros]:[];
   const mb={...m[idxEditar]};
-  const novoStatus=document.getElementById('editStatus').value;
   mb.nome=document.getElementById('editNome').value.trim()||mb.nome;
   mb.cargo=document.getElementById('editCargo').value;
-  if(novoStatus!==mb.status){
-    mb.status=novoStatus;
-    mb.onlineSince=novoStatus==='online'?Date.now():null;
-  }
+  const novoStatus=document.getElementById('editStatus').value;
+  if(novoStatus!==mb.status){mb.status=novoStatus;mb.onlineSince=novoStatus==='online'?Date.now():null;}
   m[idxEditar]=mb;
   db.ref('membros').set(m);
   fecharModal('modalEditar');
   registrarAtividade('Membro editado: '+mb.nome);
-  toast('// ALTERAÇÕES SALVAS','green-toast');
-  somSucesso();
+  toast('// ALTERAÇÕES SALVAS','green-toast');somSucesso();
+}
+
+function fecharModal(id){document.getElementById(id).classList.remove('open');}
+
+// ======= USUÁRIOS =======
+function criarUsuario(){
+  if(nivelAtual!=='admin'){toast('// SEM PERMISSÃO');somErro();return;}
+  const login=document.getElementById('novoUserLogin').value.trim().toLowerCase();
+  const senha=document.getElementById('novoUserSenha').value;
+  const nome=document.getElementById('novoUserNome').value.trim();
+  const nivel=document.getElementById('novoUserNivel').value;
+  if(!login||!senha||!nome){toast('// PREENCHA TODOS OS CAMPOS');somErro();return;}
+  if(senha.length<4){toast('// SENHA MUITO CURTA');somErro();return;}
+  if(login==='admin'){toast('// LOGIN RESERVADO');somErro();return;}
+  db.ref('usuarios/'+login).set({login,senha,nome,nivel,criadoPor:usuarioAtual,criadoEm:Date.now()});
+  document.getElementById('novoUserLogin').value='';
+  document.getElementById('novoUserSenha').value='';
+  document.getElementById('novoUserNome').value='';
+  registrarAtividade('Novo usuário criado: '+login+' ('+nivel+')');
+  toast('// USUÁRIO '+login.toUpperCase()+' CRIADO','green-toast');somSucesso();
+}
+
+function renderUsuarios(){
+  const lista=document.getElementById('listaUsuarios');
+  if(!lista)return;
+  const users=window._usuarios||{};
+  const entries=Object.entries(users);
+
+  // Sempre mostrar admin padrão no topo
+  const rows=[`<tr>
+    <td><strong>admin</strong></td>
+    <td>Admin</td>
+    <td><span class="nivel-badge admin">ADMIN</span></td>
+    <td><span style="color:var(--text3);font-size:11px;">padrão do sistema</span></td>
+    <td>—</td>
+  </tr>`];
+
+  rows.push(...entries.map(([login,u])=>{
+    const nivelLabel={admin:'ADMIN',sub:'SUB-LÍDER',view:'SOLDADO'}[u.nivel]||u.nivel.toUpperCase();
+    return`<tr>
+      <td><strong>${login}</strong></td>
+      <td>${u.nome}</td>
+      <td><span class="nivel-badge ${u.nivel}">${nivelLabel}</span></td>
+      <td><span style="color:var(--text3);font-size:11px;">${u.criadoPor||'—'}</span></td>
+      <td><button class="btn btn-sm btn-outline" onclick="prepExcluirUser('${login}')" style="padding:4px 12px;font-size:11px;">EXCLUIR</button></td>
+    </tr>`;
+  }));
+
+  if(entries.length===0){rows.push('<tr><td colspan="5"><div class="empty">// NENHUM USUÁRIO CADASTRADO</div></td></tr>');}
+  lista.innerHTML=rows.join('');
+}
+
+let loginExcluirUser=null;
+function prepExcluirUser(login){loginExcluirUser=login;document.getElementById('modalExcluirUser').classList.add('open');}
+function confirmarExclusaoUser(){
+  db.ref('usuarios/'+loginExcluirUser).remove();
+  fecharModal('modalExcluirUser');
+  registrarAtividade('Usuário removido: '+loginExcluirUser);
+  toast('// USUÁRIO EXCLUÍDO');somExcluir();
+  loginExcluirUser=null;
 }
 
 // ======= CAIXA =======
 let chartCaixa;
-
 function renderCaixa(){
   const c=window._caixa?.saldo||0;
   const fmt='$'+parseInt(c).toLocaleString('pt-BR');
@@ -797,7 +726,7 @@ function operacaoCaixa(tipo){
   const val=parseInt(v);
   db.ref('caixa').transaction(cx=>{
     const cur=cx||{saldo:0,hist:[]};
-    if(tipo==='rem'&&val>cur.saldo){return cur;}
+    if(tipo==='rem'&&val>cur.saldo)return cur;
     cur.saldo=(cur.saldo||0)+(tipo==='add'?val:-val);
     const hist=cur.hist||[];
     const hora=new Date().toLocaleTimeString();
@@ -806,9 +735,8 @@ function operacaoCaixa(tipo){
     cur.hist=hist;
     return cur;
   },()=>{
-    registrarAtividade((tipo==='add'?'Depósito':'Retirada')+' $'+val.toLocaleString('pt-BR'));
-    toast(tipo==='add'?'// DEPÓSITO REALIZADO':'// RETIRADA REALIZADA',tipo==='add'?'green-toast':'');
-    somSucesso();
+    registrarAtividade((tipo==='add'?'Depósito':'Retirada')+' $'+val.toLocaleString('pt-BR')+' por '+usuarioAtual);
+    toast(tipo==='add'?'// DEPÓSITO REALIZADO':'// RETIRADA REALIZADA',tipo==='add'?'green-toast':'');somSucesso();
   });
 }
 
@@ -819,33 +747,15 @@ function gerarGraficoCaixa(){
   if(chartCaixa)chartCaixa.destroy();
   const dados=hist.slice(0,10).reverse();
   if(!dados.length)return;
-  chartCaixa=new Chart(ctx,{
-    type:'line',
-    data:{
-      labels:dados.map((_,i)=>'#'+(i+1)),
-      datasets:[{
-        data:dados.map(d=>d.saldo||0),
-        borderColor:'#00e87a',
-        backgroundColor:'rgba(0,232,122,0.08)',
-        borderWidth:2,
-        pointBackgroundColor:'#00e87a',
-        pointRadius:3,
-        tension:.4,
-        fill:true
-      }]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{
-        x:{ticks:{color:'#604040',font:{size:10,family:'Share Tech Mono'}},grid:{color:'#1a1a1a'}},
-        y:{ticks:{color:'#604040',font:{size:10,family:'Share Tech Mono'},callback:v=>'$'+v.toLocaleString('pt-BR')},grid:{color:'#1a1a1a'}}
-      }
-    }
-  });
+  chartCaixa=new Chart(ctx,{type:'line',data:{labels:dados.map((_,i)=>'#'+(i+1)),datasets:[{data:dados.map(d=>d.saldo||0),borderColor:'#00e87a',backgroundColor:'rgba(0,232,122,0.08)',borderWidth:2,pointBackgroundColor:'#00e87a',pointRadius:3,tension:.4,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#604040',font:{size:10,family:'Share Tech Mono'}},grid:{color:'#1a1a1a'}},y:{ticks:{color:'#604040',font:{size:10,family:'Share Tech Mono'},callback:v=>'$'+v.toLocaleString('pt-BR')},grid:{color:'#1a1a1a'}}}}});
 }
 
 // ======= ATIVIDADES =======
+function registrarAtividade(msg){
+  const hora=new Date().toLocaleTimeString();
+  const key='a_'+Date.now();
+  db.ref('atividades/'+key).set('['+hora+'] '+msg);
+}
 function renderAtividades(){
   const a=window._atividades||[];
   const lista=document.getElementById('listaAtividades');
@@ -855,74 +765,27 @@ function renderAtividades(){
 }
 
 // ======= GRÁFICO STATUS =======
-let chart;
-function gerarGrafico(){
-  const m=window._membros||[];
-  let on=0,off=0,miss=0;
-  m.forEach(x=>{if(x.status==='online')on++;else if(x.status==='offline')off++;else if(x.status==='missao')miss++;});
+function gerarGrafico(on=0,off=0,miss=0){
   const ctx=document.getElementById('grafico');
   if(!ctx)return;
   if(chart)chart.destroy();
-  chart=new Chart(ctx,{
-    type:'doughnut',
-    data:{
-      labels:['Online','Offline','Missão'],
-      datasets:[{data:[on,off,miss],backgroundColor:['#00e87a','#e01010','#ffd000'],borderColor:'#0e0e0e',borderWidth:3,hoverOffset:6}]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,cutout:'65%',
-      plugins:{legend:{display:true,position:'bottom',labels:{color:'#a08080',font:{size:10,family:'Share Tech Mono'},padding:12,boxWidth:10}}}
-    }
-  });
+  chart=new Chart(ctx,{type:'doughnut',data:{labels:['Online','Offline','Missão'],datasets:[{data:[on,off,miss],backgroundColor:['#00e87a','#e01010','#ffd000'],borderColor:'#0e0e0e',borderWidth:3,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:true,position:'bottom',labels:{color:'#a08080',font:{size:10,family:'Share Tech Mono'},padding:12,boxWidth:10}}}}});
 }
 
 // ======= RANKING =======
 let chartCargos;
 function renderRanking(){
-  const m=JSON.parse(localStorage.getItem('membros')||'[]');
+  const m=window._membros||[];
   const cargos=['Líder','Sub-Líder','Capitão','Soldado','Recruta'];
-  const counts={};
-  cargos.forEach(c=>counts[c]=0);
+  const counts={};cargos.forEach(c=>counts[c]=0);
   m.forEach(x=>{if(counts[x.cargo]!==undefined)counts[x.cargo]++;});
   const total=m.length||1;
-
   const el=document.getElementById('rankCargos');
-  if(el){
-    el.innerHTML=cargos.map(c=>`
-      <div class="rank-bar-wrap">
-        <div class="rank-label">
-          <span>${c}</span>
-          <span>${counts[c]} membro${counts[c]!==1?'s':''}</span>
-        </div>
-        <div class="rank-bar">
-          <div class="rank-fill" style="width:${Math.round(counts[c]/total*100)}%"></div>
-        </div>
-      </div>`).join('');
-  }
-
+  if(el)el.innerHTML=cargos.map(c=>`<div class="rank-bar-wrap"><div class="rank-label"><span>${c}</span><span>${counts[c]} membro${counts[c]!==1?'s':''}</span></div><div class="rank-bar"><div class="rank-fill" style="width:${Math.round(counts[c]/total*100)}%"></div></div></div>`).join('');
   const ctx=document.getElementById('graficoCargos');
   if(!ctx)return;
   if(chartCargos)chartCargos.destroy();
-  chartCargos=new Chart(ctx,{
-    type:'bar',
-    data:{
-      labels:cargos,
-      datasets:[{
-        data:cargos.map(c=>counts[c]),
-        backgroundColor:'rgba(224,16,16,0.5)',
-        borderColor:'#e01010',
-        borderWidth:1
-      }]
-    },
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false}},
-      scales:{
-        x:{ticks:{color:'#604040',font:{size:10,family:'Share Tech Mono'}},grid:{color:'#1a1a1a'}},
-        y:{ticks:{color:'#604040',font:{size:10,family:'Share Tech Mono'},stepSize:1},grid:{color:'#1a1a1a'}}
-      }
-    }
-  });
+  chartCargos=new Chart(ctx,{type:'bar',data:{labels:cargos,datasets:[{data:cargos.map(c=>counts[c]),backgroundColor:'rgba(224,16,16,0.5)',borderColor:'#e01010',borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#604040',font:{size:10,family:'Share Tech Mono'}},grid:{color:'#1a1a1a'}},y:{ticks:{color:'#604040',font:{size:10,family:'Share Tech Mono'},stepSize:1},grid:{color:'#1a1a1a'}}}}});
 }
 
 // ======= LOCALIZAÇÕES =======
@@ -932,51 +795,26 @@ const locsDefault=[
   {id:'lav',nome:'LAVAGEM DE DINHEIRO',sub:'// OPERAÇÃO FINANCEIRA',img:''},
   {id:'venda',nome:'PONTO DE VENDA',sub:'// COMERCIALIZAÇÃO',img:''}
 ];
-
 function renderLocalizacoes(){
-  const saved=JSON.parse(localStorage.getItem('localizacoes')||'null')||locsDefault;
+  const locs=window._localizacoes?Object.values(window._localizacoes):locsDefault;
   const grid=document.getElementById('locGrid');
   if(!grid)return;
-  grid.innerHTML=saved.map(loc=>`
-    <div class="loc-card">
-      <div class="loc-img-wrap" onclick="${loc.img?'abrirLightbox(\''+loc.img+'\')':''}">
-        ${loc.img
-          ?`<img src="${loc.img}" onerror="this.style.display='none'">`
-          :`<div class="loc-img-placeholder">// SEM IMAGEM</div>`
-        }
-        ${loc.img?'<div class="loc-zoom">⛶ TELA CHEIA</div>':''}
-      </div>
-      <div class="loc-card-body">
-        <h3>${loc.nome}</h3>
-        <p>${loc.sub}</p>
-        <input type="text" placeholder="Cole o link da imagem aqui..." value="${loc.img}" onchange="salvarImgLoc('${loc.id}',this.value)" style="margin-top:4px;">
-      </div>
-    </div>`).join('');
+  grid.innerHTML=locs.map(loc=>`<div class="loc-card"><div class="loc-img-wrap" onclick="${loc.img?'abrirLightbox(\''+loc.img+'\')':''}">
+    ${loc.img?`<img src="${loc.img}">`:`<div class="loc-img-placeholder">// SEM IMAGEM</div>`}
+    ${loc.img?'<div class="loc-zoom">⛶ TELA CHEIA</div>':''}
+  </div><div class="loc-card-body"><h3>${loc.nome}</h3><p>${loc.sub}</p>
+    <input type="text" placeholder="Cole o link da imagem..." value="${loc.img||''}" onchange="salvarImgLoc('${loc.id}','${loc.nome}','${loc.sub}',this.value)">
+  </div></div>`).join('');
 }
-
-function salvarImgLoc(id,url){
-  const saved=JSON.parse(localStorage.getItem('localizacoes')||'null')||JSON.parse(JSON.stringify(locsDefault));
-  const loc=saved.find(l=>l.id===id);
-  if(loc){loc.img=url.trim();}
-  localStorage.setItem('localizacoes',JSON.stringify(saved));
-  renderLocalizacoes();
+function salvarImgLoc(id,nome,sub,url){
+  db.ref('localizacoes/'+id).set({id,nome,sub,img:url.trim()});
   toast('// IMAGEM ATUALIZADA','green-toast');
 }
 
 // ======= LIGHTBOX =======
-function abrirLightbox(src){
-  if(!src)return;
-  document.getElementById('lightboxImg').src=src;
-  document.getElementById('lightbox').classList.add('open');
-}
+function abrirLightbox(src){if(!src)return;document.getElementById('lightboxImg').src=src;document.getElementById('lightbox').classList.add('open');}
 function fecharLightbox(){document.getElementById('lightbox').classList.remove('open');}
-
-// ======= KEYBOARD =======
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){fecharLightbox();fecharModal('modalExcluir');fecharModal('modalEditar');}
-});
-
-// ======= SAIR =======
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){fecharLightbox();['modalExcluir','modalEditar','modalExcluirUser'].forEach(fecharModal);}});
 function sair(){location.reload();}
 </script>
 </body>
